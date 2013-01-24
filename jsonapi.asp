@@ -171,22 +171,8 @@ sub ShowDevice(id)
   'Render a device
   dim device
   set device = hs.GetDeviceByRef(hs.DeviceExistsRef(id))
-
-  deviceStatus = hs.DeviceString(id)
-  if deviceStatus = "" then
-    select case hs.DeviceStatus(id)
-      case 2
-        deviceStatus = "true"
-      case 3
-        deviceStatus = "false"
-      case 4
-        deviceStatus = "true"
-      case else
-        deviceStatus = "unknown"
-      end select
-  end if
-
   deviceValue = hs.DeviceValue(id)
+  deviceStatus = hs.DeviceStatus(id)
 
   response.write "{"
   response.write """id"": """ & id & """, "
@@ -194,7 +180,7 @@ sub ShowDevice(id)
   response.write """room"": """ & device.location & """, "
   response.write """floor"": """ & device.location2 & """, "
   response.write """dimmable"": " & lcase(device.can_dim) & ", "
-  response.write """on"": " & lcase(deviceStatus) & ", "
+  response.write """status"": " & deviceStatus & ", "
   response.write """value"": " & deviceValue & ", "
   response.write """since"": """ & hs.DeviceLastChange(id) & """, "
   response.write """type"": """ & device.dev_type_string & """, "
@@ -233,12 +219,12 @@ sub DeviceOn(id)
   set dev = hs.GetDeviceByRef(hs.DeviceExistsRef(id))
 
   if dev.can_dim then
-    hs.ExecX10 id,"ddim",100
+    hs.ExecX10 id, "ddim", 100
     ' TODO make sure we get an updated device json object back
     ' currently it is the old one, with the old value / status
     ShowDevice(id)
   else ' just turn it on
-    hs.ExecX10 id,"on"
+    hs.ExecX10 id, "on"
     ' TODO make sure we get an updated device json object back
     ' currently it is the old one, with the old value / status
     ShowDevice(id)
@@ -257,7 +243,7 @@ sub DeviceOff(id)
 
   set dev = hs.GetDeviceByRef(hs.DeviceExistsRef(id))
 
-  hs.ExecX10 id,"off"
+  hs.ExecX10 id, "off"
   ' TODO make sure we get an updated device json object back
   ' currently it is the old one, with the old value / status
   ShowDevice(id)
@@ -269,6 +255,8 @@ end sub
 
 ' *****************************************************************************
 sub SetDeviceValue(id, value)
+  dim dev
+  
   ' find the device validating if it exists
   if hs.DeviceExists(id) = -1 then
       ShowError("No device exists with id " & id & ".")
@@ -286,7 +274,7 @@ sub SetDeviceValue(id, value)
     end if
 
   if dev.can_dim then
-    hs.ExecX10 id,"ddim",k
+    hs.ExecX10 id, "ddim", k
     ' TODO make sure we get an updated device json object back
     ' currently it is the old one, with the old value / status
     ShowDevice(id)
