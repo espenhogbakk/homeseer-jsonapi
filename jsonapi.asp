@@ -129,7 +129,9 @@ sub ShowRoom(room)
                 ' show this device
                 id = dev.hc & dev.dc
                 ShowDevice(id)
-                response.write ", "
+		    if not devices.Finished then
+                  response.write ", "
+		    end if
               end if
           end if
         loop
@@ -155,7 +157,9 @@ sub ShowDevices()
                 ' show this device
                 id = dev.hc & dev.dc
                 ShowDevice(id)
-                response.write ", "
+		    if not devices.Finished then
+                  response.write ", "
+		    end if
               end if
           end if
         loop
@@ -175,8 +179,8 @@ sub ShowDevice(id)
   deviceStatus = hs.DeviceStatus(id)
 
   response.write "{"
-  response.write """id"": """ & id & """, "
-  response.write """name"": """ & device.name & """, "
+  response.write """id"": """ & Replace(id, "\", "\u005C") & """, "
+  response.write """name"": """ & Replace(device.name, "\", "\u005C") & """, "
   response.write """room"": """ & device.location & """, "
   response.write """floor"": """ & device.location2 & """, "
   response.write """dimmable"": " & lcase(device.can_dim) & ", "
@@ -302,7 +306,9 @@ sub ShowEvents()
       if not evt is nothing then
         ' print event
         ShowEvent(evt)
+	  if not events.Finished then
         response.write ", "
+	  end if
       end if
     loop
   end if
